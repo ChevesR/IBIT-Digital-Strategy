@@ -1,17 +1,13 @@
-
+import streamlit as st
 import pandas as pd
 import yfinance as yf
-import streamlit as st
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-# Page configuration
 st.set_page_config(page_title="IBIT Strategy Tracker", layout="wide")
 
-# === CONFIGURATION ===
 TARGET_IBIT_SHARES = 1756
 
-# === LOAD FUNCTIONS ===
 def load_portfolio(filepath):
     return pd.read_excel(filepath)
 
@@ -71,7 +67,6 @@ def analyze_options(df, ibit_price):
         })
     return pd.DataFrame(records)
 
-# === UI ===
 uploaded_file = st.file_uploader("📂 Upload your portfolio Excel file:", type=["xlsx"])
 
 if uploaded_file:
@@ -82,34 +77,28 @@ if uploaded_file:
     option_delta = calculate_option_delta_gain(df, prices['IBIT_Price'])
     total_shares = ibit_shares + option_delta / 100
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("IBIT Price", f"${prices['IBIT_Price']:.2f}")
-    col2.metric("BTC Price", f"${prices['BTC_Price']:.0f}")
-    col3.metric("FBTC Price", f"${prices['FBTC_Price']:.2f}")
+    st.metric("IBIT Price", f"${prices['IBIT_Price']:.2f}")
+    st.metric("BTC Price", f"${prices['BTC_Price']:.0f}")
+    st.metric("FBTC Price", f"${prices['FBTC_Price']:.2f}")
 
-    st.markdown("### 🎯 Goal Progress")
     st.pyplot(draw_coin_progress(total_shares, TARGET_IBIT_SHARES))
 
-    st.markdown(f"✅ Sanity Check — IBIT: {ibit_shares}, Options: {int(option_delta / 100)}, Total: {int(total_shares)} / {TARGET_IBIT_SHARES}")  
-"
-                f"**💼 Est. Shares from Options:** {int(option_delta / 100)}  
-"
-                f"**📊 Total Projected Shares:** {int(total_shares)} / {TARGET_IBIT_SHARES}")
+    st.markdown(f"✅ Sanity Check — IBIT: {ibit_shares}, Options: {int(option_delta / 100)}, Total: {int(total_shares)} / {TARGET_IBIT_SHARES}")
 
-    st.markdown("### 📝 Option Commentary")
-    option_table = analyze_options(df, prices['IBIT_Price'])
+    st.subheader("Option Commentary")
+    table = analyze_options(df, prices['IBIT_Price'])
 
     def color_status(val):
         color = {"Green": "#d4edda", "Yellow": "#fff3cd", "Orange": "#ffeeba", "Red": "#f8d7da"}.get(val, "")
         return f"background-color: {color}"
 
-    st.dataframe(option_table.style.applymap(color_status, subset=['Status']))
+    st.dataframe(table.style.applymap(color_status, subset=['Status']))
 
-    st.markdown("### 📘 Detailed Commentary with Rationale")
+    st.subheader("Detailed Commentary with Rationale")
     rationale_df = pd.read_excel("IBIT_Option_Commentary_With_Rationale.xlsx")
     st.dataframe(rationale_df.style.applymap(color_status, subset=['Status']))
 
-    st.markdown("### 📂 Raw Portfolio Data")
+    st.subheader("Raw Portfolio Data")
     st.dataframe(df)
 else:
     st.warning("Please upload your portfolio file to begin.")
