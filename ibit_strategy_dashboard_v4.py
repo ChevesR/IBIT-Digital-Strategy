@@ -90,7 +90,7 @@ if uploaded_file:
     st.markdown("### 🎯 Goal Progress")
     st.pyplot(draw_coin_progress(total_shares, TARGET_IBIT_SHARES))
 
-    st.markdown(f"**📌 Current IBIT Shares:** {ibit_shares}  
+    st.markdown(f"✅ Sanity Check — IBIT: {ibit_shares}, Options: {int(option_delta / 100)}, Total: {int(total_shares)} / {TARGET_IBIT_SHARES}")  
 "
                 f"**💼 Est. Shares from Options:** {int(option_delta / 100)}  
 "
